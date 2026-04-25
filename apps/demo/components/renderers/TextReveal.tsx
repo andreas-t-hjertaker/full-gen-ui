@@ -1,44 +1,42 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { z } from 'zod';
-import type { TextRevealSchema } from '@/lib/schemas';
+import type { TextRevealSpec } from '@/lib/schemas';
 import clsx from 'clsx';
 
-type Props = z.infer<typeof TextRevealSchema>;
-
-const sizeMap = {
+const sizeMap: Record<NonNullable<TextRevealSpec['size']>, string> = {
   sm: 'text-xl',
   md: 'text-3xl',
   lg: 'text-5xl',
   xl: 'text-7xl',
+  '2xl': 'text-8xl',
 };
 
-export default function TextReveal({
-  text,
-  highlightWords = [],
-  speed = 1,
-  size = 'lg',
-  color = '#ffffff',
-}: Props) {
+export function TextReveal({ spec }: { spec: TextRevealSpec }) {
+  const {
+    text,
+    highlight = [],
+    speed = 1,
+    size = 'lg',
+    color = '#ffffff',
+  } = spec;
+
   const words = text.split(' ');
   const [visibleCount, setVisibleCount] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(
-      () => {
-        setVisibleCount((c) => {
-          if (c >= words.length) {
-            clearInterval(interval);
-            return c;
-          }
-          return c + 1;
-        });
-      },
-      120 / speed
-    );
+    setVisibleCount(0);
+    const interval = setInterval(() => {
+      setVisibleCount((c) => {
+        if (c >= words.length) {
+          clearInterval(interval);
+          return c;
+        }
+        return c + 1;
+      });
+    }, 120 / speed);
     return () => clearInterval(interval);
-  }, [words.length, speed]);
+  }, [text, words.length, speed]);
 
   return (
     <div className="absolute inset-0 flex items-center justify-center p-12">
@@ -50,7 +48,7 @@ export default function TextReveal({
         style={{ color }}
       >
         {words.map((word, i) => {
-          const isHighlighted = highlightWords.includes(word);
+          const isHighlighted = highlight.includes(word);
           return (
             <span
               key={i}

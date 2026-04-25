@@ -1,10 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import type { z } from 'zod';
-import type { ConceptDiagramSchema } from '@/lib/schemas';
-
-type Props = z.infer<typeof ConceptDiagramSchema>;
+import type { ConceptDiagramSpec } from '@/lib/schemas';
 
 interface NodePos {
   id: string;
@@ -16,7 +13,8 @@ interface NodePos {
   vy: number;
 }
 
-export default function ConceptDiagram({ nodes, edges, title }: Props) {
+export function ConceptDiagram({ spec }: { spec: ConceptDiagramSpec }) {
+  const { nodes, edges, title } = spec;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const posRef = useRef<NodePos[]>([]);
@@ -24,11 +22,12 @@ export default function ConceptDiagram({ nodes, edges, title }: Props) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     const w = canvas.width;
     const h = canvas.height;
 
-    // Place nodes in a circle initially
     posRef.current = nodes.map((n, i) => {
       const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
       const radius = Math.min(w, h) * 0.3;
@@ -48,7 +47,6 @@ export default function ConceptDiagram({ nodes, edges, title }: Props) {
     const simulate = () => {
       const pos = posRef.current;
 
-      // Repulsion between nodes
       for (let i = 0; i < pos.length; i++) {
         for (let j = i + 1; j < pos.length; j++) {
           const dx = pos[i].x - pos[j].x;
@@ -62,10 +60,9 @@ export default function ConceptDiagram({ nodes, edges, title }: Props) {
         }
       }
 
-      // Attraction along edges
       for (const edge of edges) {
-        const src = pos.find((p) => p.id === edge.from);
-        const tgt = pos.find((p) => p.id === edge.to);
+        const src = pos.find((p) => p.id === edge.source);
+        const tgt = pos.find((p) => p.id === edge.target);
         if (!src || !tgt) continue;
         const dx = tgt.x - src.x;
         const dy = tgt.y - src.y;
@@ -77,7 +74,6 @@ export default function ConceptDiagram({ nodes, edges, title }: Props) {
         tgt.vy -= (dy / dist) * force;
       }
 
-      // Centre gravity
       for (const p of pos) {
         p.vx += (w / 2 - p.x) * 0.001;
         p.vy += (h / 2 - p.y) * 0.001;
@@ -97,10 +93,9 @@ export default function ConceptDiagram({ nodes, edges, title }: Props) {
 
       const pos = posRef.current;
 
-      // Draw edges
       for (const edge of edges) {
-        const src = pos.find((p) => p.id === edge.from);
-        const tgt = pos.find((p) => p.id === edge.to);
+        const src = pos.find((p) => p.id === edge.source);
+        const tgt = pos.find((p) => p.id === edge.target);
         if (!src || !tgt) continue;
 
         ctx.beginPath();
@@ -122,9 +117,9 @@ export default function ConceptDiagram({ nodes, edges, title }: Props) {
         }
       }
 
-      // Draw nodes
-      for (const p of pos) {
-        const pulse = 1 + Math.sin(t * 0.04 + pos.indexOf(p)) * 0.08;
+      for (let idx = 0; idx < pos.length; idx++) {
+        const p = pos[idx];
+        const pulse = 1 + Math.sin(t * 0.04 + idx) * 0.08;
         const radius = 28 * pulse;
 
         ctx.beginPath();
@@ -145,7 +140,6 @@ export default function ConceptDiagram({ nodes, edges, title }: Props) {
         ctx.fillText(p.label, p.x, p.y);
       }
 
-      // Title
       if (title) {
         ctx.fillStyle = 'rgba(255,255,255,0.5)';
         ctx.font = '14px system-ui';

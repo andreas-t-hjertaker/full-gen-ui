@@ -20,11 +20,7 @@
       "@fgu/catalog/educational": ["../../packages/catalog/educational/index.ts"],
       "@fgu/catalog/educational/*": ["../../packages/catalog/educational/*"],
       "@fgu/renderer/rive": ["../../packages/renderer/rive/index.ts"],
-      "@fgu/renderer/rive/*": ["../../packages/renderer/rive/*"],
-      "@fgu/core/agent": ["../../packages/core/agent/index.ts"],
-      "@fgu/core/agent/*": ["../../packages/core/agent/*"],
-      "@fgu/core/streaming": ["../../packages/core/streaming/index.ts"],
-      "@fgu/core/streaming/*": ["../../packages/core/streaming/*"]
+      "@fgu/renderer/rive/*": ["../../packages/renderer/rive/*"]
     }
   },
   "include": [
@@ -35,9 +31,7 @@
     "../../packages/catalog/educational/**/*.ts",
     "../../packages/catalog/educational/**/*.tsx",
     "../../packages/renderer/rive/**/*.ts",
-    "../../packages/renderer/rive/**/*.tsx",
-    "../../packages/core/**/*.ts",
-    "../../packages/core/**/*.tsx"
+    "../../packages/renderer/rive/**/*.tsx"
   ],
   "exclude": ["node_modules"]
 }

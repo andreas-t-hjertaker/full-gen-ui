@@ -124,21 +124,60 @@ The key insight: *do not generate pixels — generate executable animation code 
 
 ## Roadmap
 
-- [ ] `packages/core` — AG-UI transport + A2UI schema layer
-- [ ] `packages/schemas` — Zod component catalog definitions
-- [ ] `packages/renderer/pixi` — PixiJS v8 base components
-- [ ] `packages/renderer/rive` — Rive state machine bridge
-- [ ] `packages/catalog/educational` — First educational component set
-- [ ] `packages/live-gen` — In-browser Babel compiler sandbox
-- [ ] `packages/sdk` — Public React SDK
-- [ ] `apps/studio` — Visual component authoring tool
-- [ ] `apps/demo` — Educational demo (math, science, code explanations)
+- [x] `packages/core/streaming` — AG-UI transport (issue #2)
+- [x] `packages/core/agent` — multi-agent orchestration for educational mode (issue #6)
+- [x] `packages/renderer/pixi` — PixiJS v8 ParticleField (issue #1)
+- [x] `packages/renderer/rive` — Rive state machine bridge (issue #5)
+- [x] `packages/catalog/educational` — first educational component set (issue #4)
+- [x] `packages/live-gen/renderify` — in-browser Babel compiler sandbox (issue #3)
+- [x] `apps/studio` — visual component authoring tool (issue #7)
+- [x] `apps/demo` — chat + educational demo
+- [ ] `packages/sdk` — public React SDK (next)
 
 ---
 
-## Status
+## MVP — what's running
 
-🚧 **Early architecture phase** — laying foundations.
+```
+apps/demo                     apps/studio
+─────────────                 ─────────────
+http://localhost:3000   /     http://localhost:3001
+                              ↳ catalog browser + live editor
+↳ chat → renders any spec     ↳ "Test with LLM" panel
+↳ /educate → narrated lesson  ↳ JSON spec export
+```
+
+### Run it
+
+```bash
+cd apps/demo
+cp .env.example .env.local       # add ANTHROPIC_API_KEY
+pnpm install
+pnpm dev                         # localhost:3000
+
+# in another shell
+cd apps/studio
+cp .env.example .env.local
+pnpm install
+pnpm dev                         # localhost:3001
+```
+
+### Component catalog (educational)
+
+| Tool                       | Use for |
+| -------------------------- | --- |
+| `renderStepThrough`        | procedural how-it-works explanations |
+| `renderFunctionPlot`       | math functions, plots, calculus |
+| `renderSortingVisualizer`  | algorithmic complexity (bubble/insertion/selection/merge/quick) |
+| `renderPhysicsScene`       | gravity / pendulum / wave / collisions / orbit |
+| `renderTimelineEvent`      | history, evolution, milestones |
+| `renderCodeWalkthrough`    | annotated code reveals |
+
+### Transports
+
+`/api/chat` — Vercel AI SDK `useChat` (token-by-token JSON stream).
+`/api/agui` — AG-UI canonical event stream over SSE (`useAGUI` hook in `@fgu/core/streaming`).
+`/api/educate` — multi-agent orchestrated lesson stream (issue #6).
 
 ---
 

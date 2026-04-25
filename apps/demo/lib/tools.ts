@@ -5,45 +5,55 @@ import {
   ConceptDiagramSchema,
   CounterSchema,
   TextRevealSchema,
-} from '@/lib/schemas';
+  LiveGenSchema,
+} from './schemas';
 
-/**
- * Component tools — the visual vocabulary the LLM selects from.
- * Each tool = one animated component the LLM can "call" to put on screen.
- */
-export const componentTools = {
-  particleField: tool({
+export const genUITools = {
+  renderParticleField: tool({
     description:
-      'Render a GPU-accelerated particle field. Use for abstract topics, atmospheres, energy, emotion, open-ended questions.',
-    parameters: ParticleFieldSchema,
-    execute: async (params) => ({ component: 'particleField', ...params }),
+      'Render an animated GPU-accelerated particle field. Use for abstract, ambient, or energy-related concepts. Supports mouse interaction.',
+    parameters: ParticleFieldSchema.omit({ component: true }),
+    execute: async (args) => ({ component: 'ParticleField' as const, ...args }),
   }),
 
-  waveform: tool({
+  renderWaveform: tool({
     description:
-      'Animate a flowing waveform. Use for audio concepts, oscillation, frequency, rhythm, cycles, data over time.',
-    parameters: WaveformSchema,
-    execute: async (params) => ({ component: 'waveform', ...params }),
+      'Render an animated waveform. Use for sound, frequency, oscillation, heartbeat, signal, or rhythm concepts.',
+    parameters: WaveformSchema.omit({ component: true }),
+    execute: async (args) => ({ component: 'Waveform' as const, ...args }),
   }),
 
-  conceptDiagram: tool({
+  renderConceptDiagram: tool({
     description:
-      'Show an animated concept diagram with nodes and connecting arrows. Use for explaining systems, relationships, flows, hierarchies, processes.',
-    parameters: ConceptDiagramSchema,
-    execute: async (params) => ({ component: 'conceptDiagram', ...params }),
+      'Render a force-directed concept diagram with nodes and edges. Use for systems, relationships, architectures, networks, or knowledge graphs.',
+    parameters: ConceptDiagramSchema.omit({ component: true }),
+    execute: async (args) => ({ component: 'ConceptDiagram' as const, ...args }),
   }),
 
-  counter: tool({
+  renderCounter: tool({
     description:
-      'Animate a large number counting up. Use for statistics, quantities, impressive facts, data points.',
-    parameters: CounterSchema,
-    execute: async (params) => ({ component: 'counter', ...params }),
+      'Render a large animated number counting up. Use for statistics, milestones, metrics, scores, or impressive numbers.',
+    parameters: CounterSchema.omit({ component: true }),
+    execute: async (args) => ({ component: 'Counter' as const, ...args }),
   }),
 
-  textReveal: tool({
+  renderTextReveal: tool({
     description:
-      'Reveal key text word-by-word with a cinematic animation. Use for highlighting important insights, quotes, definitions, key takeaways.',
-    parameters: TextRevealSchema,
-    execute: async (params) => ({ component: 'textReveal', ...params }),
+      'Render text that reveals word by word with optional highlighting. Use for quotes, insights, definitions, or key messages.',
+    parameters: TextRevealSchema.omit({ component: true }),
+    execute: async (args) => ({ component: 'TextReveal' as const, ...args }),
+  }),
+
+  renderLiveGen: tool({
+    description:
+      'Generate and render custom animation code live in the browser — zero build step. ' +
+      'Use this for unique, creative, or complex visualizations not covered by other components. ' +
+      'Choose runtime="canvas" for performance-critical animations (particles, physics, fractals, cellular automata). ' +
+      'Choose runtime="react" for interactive UI with state and hooks. ' +
+      'IMPORTANT: For canvas, the variables `canvas` (HTMLCanvasElement) and `ctx` (CanvasRenderingContext2D) are pre-defined. ' +
+      'Use requestAnimationFrame for animation loops. ' +
+      'For react, define an `App` component using React hooks.',
+    parameters: LiveGenSchema.omit({ component: true }),
+    execute: async (args) => ({ component: 'LiveGen' as const, ...args }),
   }),
 };

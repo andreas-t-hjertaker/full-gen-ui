@@ -1,46 +1,42 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import type { ComponentSpec } from '@/lib/schemas';
 
-// Lazy-load each renderer to keep initial bundle small
-const ParticleField = React.lazy(() => import('./renderers/ParticleField'));
-const Waveform = React.lazy(() => import('./renderers/Waveform'));
-const ConceptDiagram = React.lazy(() => import('./renderers/ConceptDiagram'));
-const Counter = React.lazy(() => import('./renderers/Counter'));
-const TextReveal = React.lazy(() => import('./renderers/TextReveal'));
+// Lazy-load each renderer — only load the code that's needed
+const ParticleField = lazy(() =>
+  import('./renderers/ParticleField').then(m => ({ default: m.ParticleField }))
+);
+const ParticleFieldPixi = lazy(() =>
+  import('./renderers/ParticleFieldPixi').then(m => ({ default: m.ParticleFieldPixi }))
+);
+const Waveform = lazy(() =>
+  import('./renderers/Waveform').then(m => ({ default: m.Waveform }))
+);
+const ConceptDiagram = lazy(() =>
+  import('./renderers/ConceptDiagram').then(m => ({ default: m.ConceptDiagram }))
+);
+const Counter = lazy(() =>
+  import('./renderers/Counter').then(m => ({ default: m.Counter }))
+);
+const TextReveal = lazy(() =>
+  import('./renderers/TextReveal').then(m => ({ default: m.TextReveal }))
+);
+const LiveGenSandbox = lazy(() =>
+  import('./renderers/LiveGenSandbox').then(m => ({ default: m.LiveGenSandbox }))
+);
 
-interface Props {
-  spec: ComponentSpec;
-}
-
-export function GenUIRenderer({ spec }: Props) {
+export function GenUIRenderer({ spec }: { spec: ComponentSpec }) {
   return (
-    <Suspense
-      fallback={
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-1 h-12 bg-white/20 animate-pulse rounded-full" />
-        </div>
-      }
-    >
-      <ComponentSwitch spec={spec} />
+    <Suspense fallback={<div className="absolute inset-0 bg-black" />}>
+      <div className="absolute inset-0">
+        {spec.component === 'ParticleField' && <ParticleFieldPixi spec={spec} />}
+        {spec.component === 'Waveform' && <Waveform spec={spec} />}
+        {spec.component === 'ConceptDiagram' && <ConceptDiagram spec={spec} />}
+        {spec.component === 'Counter' && <Counter spec={spec} />}
+        {spec.component === 'TextReveal' && <TextReveal spec={spec} />}
+        {spec.component === 'LiveGen' && <LiveGenSandbox spec={spec} />}
+      </div>
     </Suspense>
   );
-}
-
-function ComponentSwitch({ spec }: Props) {
-  switch (spec.component) {
-    case 'particleField':
-      return <ParticleField {...spec} />;
-    case 'waveform':
-      return <Waveform {...spec} />;
-    case 'conceptDiagram':
-      return <ConceptDiagram {...spec} />;
-    case 'counter':
-      return <Counter {...spec} />;
-    case 'textReveal':
-      return <TextReveal {...spec} />;
-    default:
-      return null;
-  }
 }

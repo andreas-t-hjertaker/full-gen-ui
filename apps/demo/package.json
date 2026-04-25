@@ -10,32 +10,26 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "^15.0.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "ai": "^5.0.0",
-    "@ai-sdk/anthropic": "^1.0.0",
-    "@ai-sdk/react": "^1.0.0",
-    "zod": "^3.23.0",
+    "next": "^15.5.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "ai": "^4.3.19",
+    "@ai-sdk/anthropic": "^1.2.12",
+    "@ai-sdk/react": "^1.2.12",
+    "zod": "^3.23.8",
     "pixi.js": "^8.2.6",
     "@pixi/react": "^8.0.0",
-    "@copilotkit/react-core": "^1.8.0",
-    "@copilotkit/runtime": "^1.8.0",
-    "@ag-ui/client": "^0.1.0",
-    "@ag-ui/core": "^0.1.0",
     "@rive-app/react-canvas": "^4.16.0",
-    "react-hook-form": "^7.55.0",
-    "@hookform/resolvers": "^3.10.0",
-    "gsap": "^3.12.0",
-    "tailwindcss": "^3.4.0",
-    "clsx": "^2.1.0"
+    "gsap": "^3.12.5",
+    "tailwindcss": "^3.4.13",
+    "clsx": "^2.1.1"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/react": "^18.3.0",
+    "@types/node": "^22.5.5",
+    "@types/react": "^18.3.9",
     "@types/react-dom": "^18.3.0",
-    "typescript": "^5.6.0",
-    "autoprefixer": "^10.4.0",
-    "postcss": "^8.4.0"
+    "typescript": "^5.6.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47"
   }
 }

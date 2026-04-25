@@ -16,10 +16,28 @@ export const maxDuration = 60;
  * plays them in sequence with synchronized narration.
  */
 export async function POST(req: Request) {
-  const { prompt, language } = (await req.json()) as {
-    prompt: string;
-    language?: string;
-  };
+  // Fail fast on missing key — otherwise the SSE stream opens, the client
+  // waits, and the failure only surfaces on the first model call as an
+  // opaque "fetch failed" inside the event payload.
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json(
+      { error: 'ANTHROPIC_API_KEY is not configured on the server' },
+      { status: 500 }
+    );
+  }
+
+  let prompt: string;
+  let language: string | undefined;
+  try {
+    const body = (await req.json()) as { prompt?: string; language?: string };
+    prompt = (body.prompt ?? '').trim();
+    language = body.language;
+  } catch {
+    return Response.json({ error: 'invalid JSON body' }, { status: 400 });
+  }
+  if (!prompt) {
+    return Response.json({ error: 'prompt is required' }, { status: 400 });
+  }
 
   const emitter = new AGUIEmitter();
   const runId = newRunId();

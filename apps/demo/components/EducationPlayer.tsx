@@ -24,6 +24,11 @@ export function EducationPlayer() {
   const [error, setError] = useState<string | null>(null);
   const playingRef = useRef(false);
   const nextIndexRef = useRef(0);
+  // Mirror queue into a ref so the playback loop reads live data instead of
+  // its closure-captured snapshot. Without this, segments that arrive while
+  // the loop is mid-iteration are silently skipped.
+  const queueRef = useRef<CurriculumEntry[]>([]);
+  queueRef.current = queue;
 
   const start = useCallback(async (text: string) => {
     setError(null);
@@ -80,23 +85,28 @@ export function EducationPlayer() {
   }, []);
 
   // Playback loop — runs whenever the queue grows or the previous segment
-  // finishes. Uses a ref-flag so re-renders don't double-start it.
+  // finishes. Uses a ref-flag so re-renders don't double-start it. The body
+  // reads `queueRef.current` (live) rather than the captured `queue`, so
+  // entries that arrive after the loop started are still picked up.
   useEffect(() => {
     if (playingRef.current) return;
-    if (nextIndexRef.current >= queue.length) return;
+    if (nextIndexRef.current >= queueRef.current.length) return;
     playingRef.current = true;
     void (async () => {
-      while (nextIndexRef.current < queue.length) {
-        const entry = queue[nextIndexRef.current];
-        setActive(entry);
-        const narrationP = speak({
-          text: entry.narration,
-          lang: 'en-US',
-        });
-        await holdSegment(narrationP, entry.holdSeconds);
-        nextIndexRef.current++;
+      try {
+        while (nextIndexRef.current < queueRef.current.length) {
+          const entry = queueRef.current[nextIndexRef.current];
+          setActive(entry);
+          const narrationP = speak({
+            text: entry.narration,
+            lang: 'en-US',
+          });
+          await holdSegment(narrationP, entry.holdSeconds);
+          nextIndexRef.current++;
+        }
+      } finally {
+        playingRef.current = false;
       }
-      playingRef.current = false;
     })();
   }, [queue]);
 

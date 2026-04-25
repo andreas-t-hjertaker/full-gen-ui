@@ -56,17 +56,30 @@ export async function orchestrateLesson(
   const plan = await runContentAgent(model, userPrompt, decision);
 
   // 3 + 4. Visual + narration per segment, in parallel.
+  // Per-segment errors fall back to a TextReveal of the segment body —
+  // partial failure is far better than tossing the whole lesson because one
+  // tool call hallucinated bad arguments.
   const language = opts.language ?? decision.language ?? 'en-US';
   const entries = await Promise.all(
     plan.segments.map(async (seg, index): Promise<CurriculumEntry> => {
-      const [componentSpec, narration] = await Promise.all([
+      const [visual, narration] = await Promise.allSettled([
         runVisualAgent(model, visualTools, seg, plan, decision),
         runNarrationAgent(model, seg, language),
       ]);
+      const componentSpec =
+        visual.status === 'fulfilled'
+          ? visual.value
+          : ({
+              component: 'TextReveal',
+              text: seg.body,
+              size: 'md',
+            } as const);
+      const narrationText =
+        narration.status === 'fulfilled' ? narration.value : seg.body;
       const entry: CurriculumEntry = {
         index,
         title: seg.title,
-        narration,
+        narration: narrationText,
         componentSpec,
         holdSeconds: seg.approxSeconds,
       };

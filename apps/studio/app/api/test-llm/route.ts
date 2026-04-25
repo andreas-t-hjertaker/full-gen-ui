@@ -57,6 +57,12 @@ const tools = {
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return Response.json(
+        { error: 'ANTHROPIC_API_KEY is not configured on the server' },
+        { status: 500 }
+      );
+    }
     const { prompt } = (await req.json()) as { prompt: string };
     if (!prompt) {
       return Response.json({ error: 'prompt required' }, { status: 400 });

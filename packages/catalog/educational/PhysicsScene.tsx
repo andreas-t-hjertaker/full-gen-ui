@@ -202,10 +202,12 @@ export function PhysicsScene({ spec }: { spec: PhysicsSceneSpec }) {
         const b = bodies[0];
         const dx = b.x - anchor.x;
         const dy = b.y - anchor.y;
-        const dist = Math.hypot(dx, dy);
+        // Clamp dist away from zero — if the bob coincides with the anchor
+        // the spring force becomes 0/0 NaN and the animation freezes.
+        const dist = Math.max(0.01, Math.hypot(dx, dy));
         const stretch = dist - len;
-        const ax = (-stretch * dx) / dist * k;
-        const ay = (-stretch * dy) / dist * k;
+        const ax = ((-stretch * dx) / dist) * k;
+        const ay = ((-stretch * dy) / dist) * k;
         b.vx += ax;
         b.vy += ay + gravity * 0.2;
         b.vx *= damp;

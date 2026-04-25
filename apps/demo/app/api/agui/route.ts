@@ -20,6 +20,13 @@ renderTimelineEvent, renderCodeWalkthrough) for any "how does X work" / explanat
  * use Vercel AI SDK's `useChat` hook or the AG-UI `useAGUI` hook.
  */
 export async function POST(req: Request) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json(
+      { error: 'ANTHROPIC_API_KEY is not configured on the server' },
+      { status: 500 }
+    );
+  }
+
   const { messages } = (await req.json()) as {
     messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
   };

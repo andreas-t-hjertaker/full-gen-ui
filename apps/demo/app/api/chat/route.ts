@@ -39,6 +39,13 @@ For renderLiveGen:
 - Make the code visually stunning and contextually relevant to the user's prompt.`;
 
 export async function POST(req: Request) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json(
+      { error: 'ANTHROPIC_API_KEY is not configured on the server' },
+      { status: 500 }
+    );
+  }
+
   const { messages } = await req.json();
 
   const result = streamText({

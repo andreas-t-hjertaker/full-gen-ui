@@ -1,20 +1,35 @@
 import type { ComponentSpec } from './schemas';
+import type { Message } from '@ai-sdk/react';
 
 /**
- * Extracts a component spec from an AI message.
- * The AI SDK embeds tool call results in the message content.
- * This function parses and validates the spec before rendering.
+ * Extracts a component spec from an AI SDK v5 message.
+ * Tool results are stored in message.toolInvocations[], not in message.content.
+ * Falls back to content JSON parse for custom serialization.
  */
-export function parseComponentSpec(content: string): ComponentSpec | null {
-  try {
-    // AI SDK tool results are JSON-serialized in the message
-    const parsed = JSON.parse(content);
-    if (parsed && typeof parsed === 'object' && 'component' in parsed) {
-      return parsed as ComponentSpec;
+export function parseComponentSpec(message: Message): ComponentSpec | null {
+  // Primary: AI SDK v5 toolInvocations
+  if (message.toolInvocations && message.toolInvocations.length > 0) {
+    for (const invocation of message.toolInvocations) {
+      if (invocation.state === 'result' && invocation.result) {
+        const result = invocation.result as Record<string, unknown>;
+        if (result.component && typeof result.component === 'string') {
+          return result as unknown as ComponentSpec;
+        }
+      }
     }
-    return null;
-  } catch {
-    // Plain text response — no component spec
-    return null;
   }
+
+  // Fallback: raw JSON in content string
+  if (typeof message.content === 'string') {
+    try {
+      const parsed = JSON.parse(message.content);
+      if (parsed && typeof parsed === 'object' && 'component' in parsed) {
+        return parsed as ComponentSpec;
+      }
+    } catch {
+      // Plain text — no component
+    }
+  }
+
+  return null;
 }
